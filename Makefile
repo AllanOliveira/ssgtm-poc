@@ -1,4 +1,4 @@
-# Makefile — PoC local do Server-Side Google Tag Manager (SSGTM)
+# Makefile — PoC do Server-Side Google Tag Manager (SSGTM)
 #
 # Uso: make <comando>. Rode `make help` para ver todos os comandos.
 

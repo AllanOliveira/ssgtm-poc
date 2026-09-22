@@ -1,4 +1,4 @@
-# PoC local do Server-Side Google Tag Manager (SSGTM)
+# PoC do Server-Side Google Tag Manager (SSGTM)
 #
 # Sobe dois serviços a partir da MESMA imagem oficial da Google:
 #   - preview: serve o modo debug/preview do GTM

@@ -1,4 +1,4 @@
-# PoC local — Server-Side Google Tag Manager (SSGTM)
+# PoC — Server-Side Google Tag Manager (SSGTM)
 
 Objetivo: subir um servidor de tags do GTM localmente e validar o fluxo
 ponta a ponta usando GA4 (o caso mais simples de validar).
@@ -262,7 +262,7 @@ environment:
 ```
 
 > ATENCAO: `NODE_TLS_REJECT_UNAUTHORIZED=0` desliga a verificacao de certificado
-> TLS e abre brecha para ataques MITM. Use **somente** nesta PoC local. Em
+> TLS e abre brecha para ataques MITM. Use **somente** nesta PoC. Em
 > producao, o tagging e o preview ficam no mesmo ambiente (ex.: Cloud Run) e essa
 > gambiarra nao e necessaria.
 
