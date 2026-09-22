@@ -1,0 +1,9 @@
+# Segredos e configuracao local — NUNCA versionar
+.env
+
+# Logs e artefatos dos tuneis cloudflared
+.tunnel/
+*.log
+
+# Diversos
+.DS_Store

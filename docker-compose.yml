@@ -1,0 +1,42 @@
+# PoC local do Server-Side Google Tag Manager (SSGTM)
+#
+# Sobe dois serviços a partir da MESMA imagem oficial da Google:
+#   - preview: serve o modo debug/preview do GTM
+#   - tagging: o servidor de tags real (ponto de entrada dos eventos)
+#
+# Antes de subir, preencha CONTAINER_CONFIG no arquivo .env
+# (pegue em GTM > seu container Servidor > "Provisionar servidor de tags manualmente")
+
+services:
+  # Preview server: exatamente 1 instância. Serve o modo debug do GTM.
+  preview:
+    image: gcr.io/cloud-tagging-10302018/gtm-cloud-image:stable
+    container_name: sgtm-preview
+    restart: unless-stopped
+    environment:
+      CONTAINER_CONFIG: ${CONTAINER_CONFIG}
+      RUN_AS_PREVIEW_SERVER: "true"
+    ports:
+      - "8081:8080"   # preview acessível em http://localhost:8081
+
+  # Tagging server (SST): ponto de entrada dos eventos.
+  tagging:
+    image: gcr.io/cloud-tagging-10302018/gtm-cloud-image:stable
+    container_name: sgtm-tagging
+    restart: unless-stopped
+    depends_on:
+      - preview
+    environment:
+      CONTAINER_CONFIG: ${CONTAINER_CONFIG}
+      # PREVIEW_SERVER_URL precisa ser uma URL HTTPS que o GTM alcance.
+      # Na PoC usamos a URL publica do tunel cloudflared para o preview (8081).
+      # Definido em .env como PREVIEW_SERVER_URL. Se ficar vazio, o tagging
+      # ainda sobe e processa eventos, mas o modo preview do GTM nao funciona.
+      PREVIEW_SERVER_URL: ${PREVIEW_SERVER_URL}
+      # PoC APENAS: o tagging faz proxy do /gtm/debug para o PREVIEW_SERVER_URL.
+      # Como a URL do preview e um tunel cloudflared, a validacao de certificado
+      # falha com "unable to get local issuer certificate". Desligar a verificacao
+      # de TLS resolve para a PoC. NUNCA use isso em producao (abre para MITM).
+      NODE_TLS_REJECT_UNAUTHORIZED: "0"
+    ports:
+      - "8080:8080"   # tagging server acessível em http://localhost:8080
