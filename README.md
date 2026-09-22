@@ -241,40 +241,6 @@ curl "https://<url-do-tunel-tagging>.trycloudflare.com/g/collect?v=2&tid=G-XXXXX
 
 O evento `poc_test` deve aparecer no Tag Assistant.
 
-### Troubleshooting: erro 500 ao clicar em Visualizar
-
-Se ao abrir o Preview a URL `/gtm/debug` retornar **500**, veja os logs
-(`make logs`). A causa tipica e:
-
-```
-An exception was thrown while proxying preview request.
-Message: unable to get local issuer certificate
-```
-
-O que acontece: o tagging server faz **proxy** da requisicao de debug para o
-`PREVIEW_SERVER_URL`. Como essa URL e um tunel cloudflared (HTTPS), o container
-tenta validar o certificado e falha. Para a PoC, desabilitamos a verificacao de
-TLS **apenas no tagging server** — ja incluido no `docker-compose.yml`:
-
-```yaml
-environment:
-  NODE_TLS_REJECT_UNAUTHORIZED: "0"
-```
-
-> ATENCAO: `NODE_TLS_REJECT_UNAUTHORIZED=0` desliga a verificacao de certificado
-> TLS e abre brecha para ataques MITM. Use **somente** nesta PoC. Em
-> producao, o tagging e o preview ficam no mesmo ambiente (ex.: Cloud Run) e essa
-> gambiarra nao e necessaria.
-
-Depois de ajustar, recrie e teste:
-
-```bash
-make start
-curl -o /dev/null -w '%{http_code}\n' \
-  "https://<url-do-tunel-tagging>.trycloudflare.com/gtm/debug?id=GTM-XXXX&gtm_auth=...&gtm_preview=env-1"
-# deve retornar 200
-```
-
 ### Encerrar os tuneis
 
 ```bash
