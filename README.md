@@ -86,7 +86,7 @@ esta validada de ponta a ponta.
 ## Encerrar
 
 ```bash
-docker compose down
+make stop
 ```
 
 ## Passo a passo com o Makefile
