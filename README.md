@@ -12,11 +12,18 @@ A mesma imagem roda em dois papéis:
 - **tagging server (SST)** — ponto de entrada real dos eventos; recebe as
   requisições do navegador e dispara as tags (ex.: GA4).
 
+Além disso, a PoC sobe um **Firestore Emulator** local para enriquecer eventos
+(ver a seção "Enriquecimento de eventos com Firestore"):
+
+- **firestore (emulador)** — banco NoSQL local; o tagging server le documentos
+  aqui (ex.: `users/{cid}`) e anexa dados ao evento antes de dispara-lo.
+
 Fluxo da PoC:
 
 ```
 navegador / curl  ->  tagging server (localhost:8080)  ->  GA4 (DebugView)
-                          |
+                          |         |
+                          |         +-> firestore emulator (enriquecimento)
                           +-> preview server (localhost:8081) para debug
 ```
 
@@ -165,6 +172,42 @@ GTM (nuvem) --eventos--> https://<tunel-tagging>.trycloudflare.com --> tagging s
                        PREVIEW_SERVER_URL no tagging aponta para o tunel do preview
 ```
 
+### Atalho: `make tunnels` (recomendado)
+
+Se o `cloudflared` ja estiver instalado, o Makefile automatiza os dois tuneis
+e ja grava as URLs no `.env`:
+
+```bash
+make tunnels          # sobe os 2 tuneis, espera conectar e grava as URLs no .env
+make tunnels-status   # mostra se estao no ar e testa as URLs do .env
+make tunnels-stop     # encerra os tuneis
+```
+
+Depois de `make tunnels` com sucesso:
+
+```bash
+make start            # recria o tagging com a nova PREVIEW_SERVER_URL
+# cole a TAGGING_SERVER_URL (impressa pelo comando) no GTM como
+# "URL do container servidor" e abra o modo Preview
+```
+
+> Requer resolucao de DNS de saida (o cloudflared resolve `*.argotunnel.com` e
+> conecta na porta 7844). Se o ambiente bloquear isso, o `make tunnels` falha
+> com um diagnostico claro e **nao** altera o `.env`. Nesse caso, rode num
+> ambiente com internet plena. Para so validar o enriquecimento Firestore voce
+> nao precisa de tunel — use `make event-purchase ... HOST=http://localhost:8080`.
+>
+> **DNS via UDP bloqueado?** Alguns ambientes bloqueiam DNS na porta 53/UDP (o
+> precheck do cloudflared faz lookup SRV via UDP e falha com `i/o timeout` /
+> `hard_fail`). O `make tunnels` ja contorna isso definindo
+> `RES_OPTIONS=use-vc`, que forca o resolver a usar **DNS via TCP**. Se ainda
+> assim falhar, confirme que a saida TCP para a borda da Cloudflare esta liberada:
+> `dig +tcp SRV _v2-origintunneld._tcp.argotunnel.com` deve responder, e a porta
+> 7844/TCP do IP retornado deve ser alcancavel.
+
+O passo a passo manual abaixo faz exatamente o que o `make tunnels` automatiza,
+e serve de referencia caso queira controlar cada etapa.
+
 ### 1. Instalar o cloudflared
 
 ```bash
@@ -258,13 +301,160 @@ pkill cloudflared
 - A raiz das URLs (`/`) retorna 400/404 de proposito — o SSGTM e um endpoint de
   coleta, nao um site. Use `/healthy` para checar se esta no ar.
 
+## Enriquecimento de eventos com Firestore (emulador local)
+
+O que e o Firestore: um banco NoSQL de documentos do Google Cloud, otimizado
+para **leitura por chave com baixa latencia**. E o componente ideal para
+enriquecer um evento em tempo real no meio do request — diferente do BigQuery,
+que e um data warehouse para analytics em lote (latencia de segundos).
+
+Padrao de uso: dado o `cid` (client id) que chega no evento, o tagging server
+busca `users/{cid}` no Firestore e anexa campos (ex.: `segment`, `customer_ltv`,
+`plan`) ao evento antes de dispara-lo para GA4/Ads.
+
+Nesta PoC usamos o **Firestore Emulator** — 100% local, sem GCP, sem
+credenciais, sem custo. Fica no `docker-compose.yml` como o servico `firestore`.
+
+```
+navegador / curl -> tagging server -> [Firestore.read users/{cid}] -> GA4
+                          |                     |
+                          |               firestore (emulator, local)
+                          +-> preview server (debug)
+```
+
+### Como funciona na PoC
+
+O `docker-compose.yml` sobe o emulador e injeta duas env vars no tagging server:
+
+- `GOOGLE_CLOUD_PROJECT` — id do projeto (default `poc-sgtm`). Deve casar com o
+  `FIRESTORE_PROJECT_ID` do emulador.
+- `FIRESTORE_EMULATOR_HOST=firestore:8080` — faz o SDK do Firestore (usado pela
+  sandbox do GTM em `Firestore.read`) apontar para o emulador local em vez do
+  Firestore de producao.
+
+> Viabilidade verificada nesta PoC: a imagem oficial `gtm-cloud-image` respeita
+> `FIRESTORE_EMULATOR_HOST` e le documentos do emulador (HTTP 200) de dentro do
+> container. Nenhuma credencial e necessaria localmente.
+
+### 1. Subir a stack e popular o emulador
+
+```bash
+make start          # sobe preview + tagging + firestore
+make health         # os tres devem responder 200
+make seed           # insere os 30 usuarios de users.json na colecao users
+```
+
+> O emulador nao persiste dados entre reinicios. Rode `make seed` sempre que
+> subir a stack (apos `make start`) para ter os usuarios no Firestore.
+
+O `make seed` le o arquivo **`users.json`** (30 usuarios aleatorios) e insere
+cada um na colecao `users`, via `seed-users.sh`. Cada documento usa o `id`
+(uuid) do usuario como ID do documento e tem a estrutura:
+
+```json
+{
+  "id": "115a0836-a249-43b3-b363-33795e7f36ca",
+  "name": "Vera Rocha",
+  "email": "vera.rocha58@exemplo.com",
+  "device": {
+    "id": "e6f5f1b2-63a2-4647-9154-e9f6251bcd02",
+    "family": "android",
+    "version": 12.6
+  }
+}
+```
+
+No Firestore, `name`/`email`/`id` viram `stringValue`, o `device` vira um
+`mapValue` aninhado e `device.version` um `doubleValue` (float).
+
+Para regenerar o `users.json` com 30 novos usuarios aleatorios, rode o gerador
+(veja o comando python em `users.json` — os UUIDs mudam a cada geracao).
+
+Comandos uteis:
+
+```bash
+make firestore-list                # lista os IDs dos documentos em users/
+make firestore-get CID=<uuid>      # mostra um documento especifico
+```
+
+> Alem do `make seed`, existe o `make seed-sample`: insere 3 usuarios simples
+> (`555.777`, `111.222`, `abc.123`) alinhados ao `CID` padrao do
+> `make event-purchase`, uteis para testar o enriquecimento de ponta a ponta
+> sem precisar copiar um uuid.
+
+### 2. Criar a Variable Template no GTM
+
+O SSGTM tem um tipo de variavel nativo para ler do Firestore (nao precisa de
+template externo para leitura por chave):
+
+
+1. No container **Servidor**, va em **Variables > New > Firestore Lookup**
+   (nome pode aparecer como "Firestore" na lista de tipos de variavel).
+2. Configure:
+   - **Document Path**: `users/{{cid}}` — onde `{{cid}}` e uma variavel que
+     extrai o client id do evento (ex.: uma Query Parameter variable lendo `cid`,
+     ou um Event Data lendo `client_id`).
+   - **Key Path (field)**: o campo que voce quer, ex.: `customer_ltv`.
+   - **Project ID**: `poc-sgtm` (o mesmo do `GOOGLE_CLOUD_PROJECT`).
+3. Salve como, por exemplo, **`fs.customer_ltv`**.
+
+> Leitura por atributo vs documento inteiro: a variavel nativa do Firestore
+> retorna **um campo** do documento. Se precisar do documento inteiro e fazer
+> parse de varios campos, existem templates da comunidade (ex.: "Artemis" do
+> google-marketing-solutions) — fora do escopo desta PoC.
+
+### 3. Usar o valor enriquecido numa tag
+
+Na sua tag GA4 (ou Ads), referencie a variavel:
+
+- Adicione um parametro do evento, ex.: `customer_ltv` = `{{fs.customer_ltv}}`.
+- Agora o valor lido do Firestore viaja junto com o evento para o GA4.
+
+### 4. Validar end-to-end
+
+```bash
+# garante os dados no emulador
+make seed
+
+# dispara um evento para o cid 555.777 (usuario "vip", ltv 4820.50)
+make event-purchase CID=555.777
+```
+
+No **Tag Assistant** (modo Preview do GTM, ver secao cloudflared), abra o
+evento e confira:
+
+- a variavel `fs.customer_ltv` resolveu para `4820.5` (valor vindo do Firestore);
+- a tag GA4 enviou o parametro enriquecido.
+
+Compare com um usuario diferente para ver o enriquecimento mudando:
+
+```bash
+make event-purchase CID=111.222   # usuario "regular", ltv 320.00
+make event-purchase CID=999.999   # cid sem documento -> variavel resolve vazia
+```
+
+> Sem o header de preview (`make set-preview HEADER=...`) o evento ainda e
+> processado (HTTP 200) e o enriquecimento acontece, mas nao aparece no Tag
+> Assistant. Ver a secao do header de preview acima.
+
+### Limitacoes do emulador (PoC)
+
+- **Dados nao persistem**: ao rodar `make stop`/`make clean` o emulador zera.
+  Rode `make seed` de novo apos subir. (Persistencia exigiria montar um volume
+  e habilitar export/import do emulador — fora do escopo da PoC.)
+- **Sem credenciais/regras de seguranca**: o emulador aceita qualquer leitura;
+  em producao o Firestore real exige service account e Security Rules.
+
 ## Proximos passos (depois da PoC)
 
-- **Enriquecer eventos com BigQuery**: como o datalake da empresa esta no
-  BigQuery (GCP), o SSGTM pode consultar o BQ dentro de uma tag/variavel
-  antes de enviar o evento. Isso exige uma service account com o papel
-  **BigQuery Data Editor** e as variaveis GOOGLE_APPLICATION_CREDENTIALS /
-  GOOGLE_CLOUD_PROJECT (ver manual de setup da Google).
+- **Trocar o emulador pelo Firestore real**: em producao, remova
+  `FIRESTORE_EMULATOR_HOST` e forneca credenciais via
+  `GOOGLE_APPLICATION_CREDENTIALS` (service account com acesso de leitura ao
+  Firestore) + `GOOGLE_CLOUD_PROJECT`. O template de variavel no GTM nao muda.
+- **Popular o Firestore a partir do BigQuery**: o datalake (BQ) processa em
+  lote e exporta agregados por usuario para o Firestore, que serve as leituras
+  de baixa latencia no request. Esse e o papel de cada um: BQ = analytics em
+  lote; Firestore = lookup em tempo real.
 - **Deploy real**: Cloud Run no GCP e o caminho recomendado (mesma cloud do
   datalake, provisionamento automatico, escalavel).
 - **Dominio first-party**: subdominio tipo metrics.suaempresa.com.

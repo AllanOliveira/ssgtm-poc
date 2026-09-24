@@ -1,13 +1,29 @@
 # PoC do Server-Side Google Tag Manager (SSGTM)
 #
-# Sobe dois serviços a partir da MESMA imagem oficial da Google:
-#   - preview: serve o modo debug/preview do GTM
+# Sobe tres serviços:
+#   - firestore: emulador local do Firestore (enriquecimento de eventos)
+#   - preview: serve o modo debug/preview do GTM      (imagem oficial da Google)
 #   - tagging: o servidor de tags real (ponto de entrada dos eventos)
 #
 # Antes de subir, preencha CONTAINER_CONFIG no arquivo .env
 # (pegue em GTM > seu container Servidor > "Provisionar servidor de tags manualmente")
 
 services:
+  # Firestore Emulator (100% local, sem GCP/credenciais).
+  # Usado para enriquecer eventos: o tagging server le documentos daqui
+  # dentro de uma Variable Template (Firestore.read) antes de disparar as tags.
+  # Imagem standalone: nao precisa de gcloud/java no host.
+  firestore:
+    image: mtlynch/firestore-emulator-docker
+    container_name: sgtm-firestore
+    restart: unless-stopped
+    environment:
+      # ID do projeto que o emulador simula. DEVE ser igual ao GOOGLE_CLOUD_PROJECT
+      # do tagging server, senao os caminhos dos documentos nao batem.
+      FIRESTORE_PROJECT_ID: ${GOOGLE_CLOUD_PROJECT:-poc-sgtm}
+    ports:
+      - "8082:8080"   # REST do emulador acessivel em http://localhost:8082 (para seed/debug)
+
   # Preview server: exatamente 1 instância. Serve o modo debug do GTM.
   preview:
     image: gcr.io/cloud-tagging-10302018/gtm-cloud-image:stable
@@ -26,8 +42,16 @@ services:
     restart: unless-stopped
     depends_on:
       - preview
+      - firestore
     environment:
       CONTAINER_CONFIG: ${CONTAINER_CONFIG}
+      # --- Enriquecimento via Firestore Emulator (local) ---
+      # GOOGLE_CLOUD_PROJECT identifica o projeto; deve casar com FIRESTORE_PROJECT_ID
+      # do emulador. FIRESTORE_EMULATOR_HOST faz o SDK do Firestore (usado pela
+      # sandbox do GTM em Firestore.read/query) apontar para o emulador local em
+      # vez do Firestore de producao. Formato host:port na rede do compose.
+      GOOGLE_CLOUD_PROJECT: ${GOOGLE_CLOUD_PROJECT:-poc-sgtm}
+      FIRESTORE_EMULATOR_HOST: firestore:8080
       # PREVIEW_SERVER_URL precisa ser uma URL HTTPS que o GTM alcance.
       # Na PoC usamos a URL publica do tunel cloudflared para o preview (8081).
       # Definido em .env como PREVIEW_SERVER_URL. Se ficar vazio, o tagging

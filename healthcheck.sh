@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
-# Valida se os dois servidores da PoC estão saudáveis.
-# Ambos expõem /healthy e devem retornar HTTP 200.
+# Valida se os servidores da PoC estão saudáveis.
+# tagging/preview expõem /healthy; o emulador do Firestore responde na raiz.
+# Todos devem retornar HTTP 200.
 set -euo pipefail
 
 check() {
@@ -16,6 +17,7 @@ check() {
 }
 
 echo "Verificando saude dos servidores SSGTM..."
-check "tagging server" "http://localhost:8080/healthy"
-check "preview server " "http://localhost:8081/healthy"
+check "tagging server  " "http://localhost:8080/healthy"
+check "preview server  " "http://localhost:8081/healthy"
+check "firestore (emul)" "http://localhost:8082/"
 echo "Tudo saudavel. Agora configure a 'URL do container servidor' no GTM como http://localhost:8080"

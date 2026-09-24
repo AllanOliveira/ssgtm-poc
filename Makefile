@@ -6,7 +6,7 @@ COMPOSE := docker compose
 
 .DEFAULT_GOAL := help
 
-.PHONY: help start stop restart logs ps health pull clean setup event-purchase set-preview
+.PHONY: help start stop restart logs ps health pull clean setup event-purchase set-preview seed seed-sample firestore-get firestore-list tunnels tunnels-stop tunnels-status
 
 # --- Parametros do `make event` (podem ser sobrescritos na linha de comando) ---
 # Carrega variaveis do .env (TAGGING_SERVER_URL, CONTAINER_CONFIG, etc.)
@@ -72,3 +72,32 @@ event-purchase: ## Dispara um evento purchase de teste (ex: make event-purchase 
 set-preview: ## Atualiza o PREVIEW_HEADER no .env (uso: make set-preview HEADER=<valor-do-header>)
 	@test -n "$(HEADER)" || { echo "Faltou o header. Uso: make set-preview HEADER=<valor-copiado-do-GTM>"; exit 1; }
 	@./set-preview.sh "$(HEADER)"
+
+# --- Firestore (enriquecimento de eventos) ---
+FS_HOST    ?= localhost:8082
+PROJECT_ID ?= $(if $(GOOGLE_CLOUD_PROJECT),$(GOOGLE_CLOUD_PROJECT),poc-sgtm)
+
+seed: ## Insere os 30 usuarios de users.json no Firestore (colecao users)
+	@FS_HOST=$(FS_HOST) PROJECT_ID=$(PROJECT_ID) ./seed-users.sh
+
+seed-sample: ## Insere os 3 usuarios de exemplo (555.777, 111.222, abc.123) p/ o make event-purchase
+	@FS_HOST=$(FS_HOST) PROJECT_ID=$(PROJECT_ID) ./seed-firestore.sh
+
+firestore-get: ## Le um doc do emulador (uso: make firestore-get CID=<id-do-usuario>)
+	@test -n "$(CID)" || { echo "Uso: make firestore-get CID=<id-do-documento>"; exit 1; }
+	@curl -s "http://$(FS_HOST)/v1/projects/$(PROJECT_ID)/databases/(default)/documents/users/$(CID)" \
+		-w '\nHTTP %{http_code}\n'
+
+firestore-list: ## Lista os IDs de documentos da colecao users
+	@curl -s "http://$(FS_HOST)/v1/projects/$(PROJECT_ID)/databases/(default)/documents/users" \
+		| python3 -c 'import sys,json; d=json.load(sys.stdin); docs=d.get("documents",[]); print(len(docs),"documentos:"); [print("  -",x["name"].split("/")[-1]) for x in docs]'
+
+# --- Tuneis cloudflared (modo Preview do GTM) ---
+tunnels: ## Sobe os 2 tuneis cloudflared e grava as URLs no .env
+	@./tunnels.sh start
+
+tunnels-stop: ## Encerra os tuneis cloudflared
+	@./tunnels.sh stop
+
+tunnels-status: ## Mostra status dos tuneis e testa as URLs do .env
+	@./tunnels.sh status

@@ -1,0 +1,302 @@
+[
+  {
+    "id": "4075b0c6-44ac-4a0d-acfe-b945fa274ef1",
+    "name": "Ana Pereira",
+    "email": "ana.pereira129@exemplo.com",
+    "device": {
+      "id": "911eae06-ca75-48bd-9f4c-8cc887c42f9b",
+      "family": "iOS",
+      "version": 15.3
+    }
+  },
+  {
+    "id": "a6403161-3427-4f87-abef-02ee6fd41894",
+    "name": "Bruno Silva",
+    "email": "bruno.silva375@exemplo.com",
+    "device": {
+      "id": "f7e88854-27d3-445f-878a-54be457f768d",
+      "family": "iOS",
+      "version": 10.8
+    }
+  },
+  {
+    "id": "b9b05dfe-88eb-4774-896a-9ec34032469d",
+    "name": "Carla Costa",
+    "email": "carla.costa637@exemplo.com",
+    "device": {
+      "id": "4fdf4d16-dca4-4eb0-a604-f7f218fac819",
+      "family": "iOS",
+      "version": 12.8
+    }
+  },
+  {
+    "id": "9bccbe90-fad7-48ed-8ee4-535359e35edb",
+    "name": "Diego Melo",
+    "email": "diego.melo274@exemplo.com",
+    "device": {
+      "id": "af498692-113b-44f7-a6ef-7bedb6e1f913",
+      "family": "android",
+      "version": 16.4
+    }
+  },
+  {
+    "id": "3fa9fe0f-a6f5-42b8-8357-469a9609bec2",
+    "name": "Elena Pereira",
+    "email": "elena.pereira547@exemplo.com",
+    "device": {
+      "id": "6a7bf1e7-b6e1-4bb5-9a2f-c45ec6efed9c",
+      "family": "android",
+      "version": 12.2
+    }
+  },
+  {
+    "id": "95a6db83-31ee-4e9c-91d7-7ea3896dfdbb",
+    "name": "Felipe Lima",
+    "email": "felipe.lima105@exemplo.com",
+    "device": {
+      "id": "beb50701-3091-423a-8b07-b2fcb03b0e3e",
+      "family": "android",
+      "version": 15.4
+    }
+  },
+  {
+    "id": "aec99768-1368-4dad-9c17-0c5a5f2f905f",
+    "name": "Gabi Rocha",
+    "email": "gabi.rocha839@exemplo.com",
+    "device": {
+      "id": "ac4b5a87-6a21-4ac0-b63a-e0b403c18492",
+      "family": "iOS",
+      "version": 12.2
+    }
+  },
+  {
+    "id": "94f3aaa8-e3fe-4fd2-acb0-f0fad287d7ca",
+    "name": "Hugo Ribeiro",
+    "email": "hugo.ribeiro874@exemplo.com",
+    "device": {
+      "id": "b89edccd-28ad-493e-b047-f0f1b71342be",
+      "family": "iOS",
+      "version": 16.1
+    }
+  },
+  {
+    "id": "6ea000a6-f082-45af-8a25-62c75d20dae3",
+    "name": "Isa Rocha",
+    "email": "isa.rocha255@exemplo.com",
+    "device": {
+      "id": "505a11a2-33a1-49ab-88dd-6ab9d9fe80e5",
+      "family": "android",
+      "version": 16.1
+    }
+  },
+  {
+    "id": "6468c204-d259-41b4-9f48-667ea3b770c9",
+    "name": "Joao Cardoso",
+    "email": "joao.cardoso285@exemplo.com",
+    "device": {
+      "id": "d8127931-6faa-4ebb-b0b7-247e22c0df1c",
+      "family": "iOS",
+      "version": 15.9
+    }
+  },
+  {
+    "id": "ba2b5aba-3473-481d-92fd-b13378c9e283",
+    "name": "Kaue Silva",
+    "email": "kaue.silva919@exemplo.com",
+    "device": {
+      "id": "fdbad28d-5ebe-4426-ad76-05da440d8325",
+      "family": "iOS",
+      "version": 15.6
+    }
+  },
+  {
+    "id": "83d81991-e1b9-4aee-92c8-0cca89de9452",
+    "name": "Livia Costa",
+    "email": "livia.costa307@exemplo.com",
+    "device": {
+      "id": "e741e72f-ce48-4176-9f8e-e8a382c238e8",
+      "family": "iOS",
+      "version": 10.6
+    }
+  },
+  {
+    "id": "1d693fec-1baa-4f97-87b8-09ef2a33f2ae",
+    "name": "Marcos Lima",
+    "email": "marcos.lima281@exemplo.com",
+    "device": {
+      "id": "b6cce7d3-a2e4-442c-8bb2-678403625ba2",
+      "family": "iOS",
+      "version": 16.0
+    }
+  },
+  {
+    "id": "880e5ddf-bab1-4621-9207-e26be25c3bba",
+    "name": "Nina Melo",
+    "email": "nina.melo68@exemplo.com",
+    "device": {
+      "id": "56bc496d-2f3e-43f0-9a72-5001c8cebb32",
+      "family": "android",
+      "version": 15.2
+    }
+  },
+  {
+    "id": "aa758c7a-1bc4-4197-adbd-dac7606365a7",
+    "name": "Otavio Pereira",
+    "email": "otavio.pereira434@exemplo.com",
+    "device": {
+      "id": "721d80ca-efda-4fc3-8501-5f87cfcb3608",
+      "family": "iOS",
+      "version": 10.4
+    }
+  },
+  {
+    "id": "837814d3-c9f8-4049-8533-c80ccec0d646",
+    "name": "Paula Almeida",
+    "email": "paula.almeida356@exemplo.com",
+    "device": {
+      "id": "045fcccb-2bdd-43dd-ac62-a5df868024b9",
+      "family": "iOS",
+      "version": 11.6
+    }
+  },
+  {
+    "id": "2aa42457-c620-4ea8-8b8a-020266f06db7",
+    "name": "Rafa Lima",
+    "email": "rafa.lima750@exemplo.com",
+    "device": {
+      "id": "87865606-0f1e-4697-b608-2ea5b46e7834",
+      "family": "iOS",
+      "version": 10.7
+    }
+  },
+  {
+    "id": "74e83ab6-9a30-4c5c-8965-1ab89adac7ea",
+    "name": "Sofia Teixeira",
+    "email": "sofia.teixeira322@exemplo.com",
+    "device": {
+      "id": "848cc8b1-c8e6-4fdb-a214-637834aa54e0",
+      "family": "iOS",
+      "version": 13.5
+    }
+  },
+  {
+    "id": "9e7211c8-b42f-4ad9-b428-8620c198037e",
+    "name": "Tiago Araujo",
+    "email": "tiago.araujo506@exemplo.com",
+    "device": {
+      "id": "ef4956d0-a5db-4cbc-85d5-61801729caf1",
+      "family": "iOS",
+      "version": 18.6
+    }
+  },
+  {
+    "id": "115a0836-a249-43b3-b363-33795e7f36ca",
+    "name": "Vera Rocha",
+    "email": "vera.rocha58@exemplo.com",
+    "device": {
+      "id": "e6f5f1b2-63a2-4647-9154-e9f6251bcd02",
+      "family": "android",
+      "version": 12.6
+    }
+  },
+  {
+    "id": "8ca32f4b-992b-4bc8-a655-5b70234989bd",
+    "name": "Yuri Ferreira",
+    "email": "yuri.ferreira588@exemplo.com",
+    "device": {
+      "id": "26c3fe51-6750-4324-9c7a-78d55f5bf25c",
+      "family": "iOS",
+      "version": 10.2
+    }
+  },
+  {
+    "id": "4fc7eb2b-9d65-4526-9f60-d36b95434dfc",
+    "name": "Bia Carvalho",
+    "email": "bia.carvalho772@exemplo.com",
+    "device": {
+      "id": "99599695-67fb-4c2e-a9d0-b12e383946de",
+      "family": "iOS",
+      "version": 15.1
+    }
+  },
+  {
+    "id": "1c6fc7b0-fafd-443a-b0c0-f96bb1fb9689",
+    "name": "Caio Rocha",
+    "email": "caio.rocha332@exemplo.com",
+    "device": {
+      "id": "0b7ac5ed-7e48-43de-bd7f-1517a7928df7",
+      "family": "android",
+      "version": 14.5
+    }
+  },
+  {
+    "id": "385405eb-1fd5-47e9-8062-5af2e1fab682",
+    "name": "Duda Araujo",
+    "email": "duda.araujo408@exemplo.com",
+    "device": {
+      "id": "b3fdc37e-5722-4f80-8663-70aa4f669bb1",
+      "family": "iOS",
+      "version": 17.0
+    }
+  },
+  {
+    "id": "e6de0262-3b83-4da5-8a07-10f8021de3a0",
+    "name": "Enzo Carvalho",
+    "email": "enzo.carvalho456@exemplo.com",
+    "device": {
+      "id": "60399a94-8c78-4563-a4f5-f5f99622d1fc",
+      "family": "android",
+      "version": 10.8
+    }
+  },
+  {
+    "id": "c2dfbfd8-cdb3-4082-8ac1-86a156a0d081",
+    "name": "Fabi Souza",
+    "email": "fabi.souza496@exemplo.com",
+    "device": {
+      "id": "8c16037f-90b0-454a-b92f-09011dd77915",
+      "family": "iOS",
+      "version": 10.2
+    }
+  },
+  {
+    "id": "70834c52-fa75-48a4-b149-45bcfb9c72f5",
+    "name": "Gustavo Cardoso",
+    "email": "gustavo.cardoso231@exemplo.com",
+    "device": {
+      "id": "6a5ca543-fdfc-4cf0-b297-9f619bf6f634",
+      "family": "android",
+      "version": 10.8
+    }
+  },
+  {
+    "id": "fbe7370f-d10c-4ac9-95b7-873921a92090",
+    "name": "Helena Gomes",
+    "email": "helena.gomes864@exemplo.com",
+    "device": {
+      "id": "267f8605-7a86-4d03-8930-7af66add2881",
+      "family": "android",
+      "version": 10.4
+    }
+  },
+  {
+    "id": "261c76ee-85db-4894-8e05-68db40d30333",
+    "name": "Igor Rodrigues",
+    "email": "igor.rodrigues213@exemplo.com",
+    "device": {
+      "id": "79c3d162-6188-4e0d-9ea3-debc2a56c5eb",
+      "family": "iOS",
+      "version": 16.4
+    }
+  },
+  {
+    "id": "85f3fbac-3b48-4c0f-a709-6397104e943a",
+    "name": "Julia Almeida",
+    "email": "julia.almeida731@exemplo.com",
+    "device": {
+      "id": "f149f7d1-aa1b-45cc-88bf-b00bcf064be9",
+      "family": "android",
+      "version": 14.6
+    }
+  }
+]
